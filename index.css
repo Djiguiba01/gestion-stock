@@ -154,7 +154,7 @@ body {
 /* ::::::::::::::::: */
 .menu-aside ul li a {
     display: block;
-    padding: 10px;
+    /* padding: 10px; */
     text-decoration: none;
     color: black; /* Couleur par défaut du texte */
 }
