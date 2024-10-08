@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="indexstock.css">
     <title>Menu</title>
 </head>
 <body>
@@ -22,12 +23,7 @@
                     <li><a href="./Ventes/ventes.html" class="card" data-path="ventes">Ventes</a></li>
                 </ul>
             </aside>
-            <main class="menu-main" id="mainContent">
-                <h2>Contenu stock</h2>
-                <p>Bienvenue dans votre application de gestion !</p>
-            </main>
-        </div>
-        <div class="popup-menu" id="popupMenu" style="display: none;">
+            <div class="popup-menu" id="popupMenu" style="display: none;">
             <ul>
                 <li><a href="./index.html" class="popup-card" data-path="stock">Stock</a></li>
                 <li><a href="./Commandes/commandes.html" class="popup-card" data-path="commandes">Commandes</a></li>
@@ -35,10 +31,84 @@
                 <li><a href="./Ventes/ventes.html" class="popup-card" data-path="ventes">Ventes</a></li>
             </ul>
         </div>
+            <main class="menu-main" id="mainContent">
+                <div class="menu">
+                    <div class="stock-card">
+                      <h2>Stock disponible</h2>
+                      <button class="add-product-button" id="addProductBtn">Ajouter un produit</button>
+                    </div>
+                
+                    <div class="product-list">
+                      <div class="product-header">
+                        <div>Désignation</div>
+                        <div>Variété</div>
+                        <div>Quantité</div>
+                        <div>Unité</div>
+                      </div>
+                      <ul id="productList">
+                        <!-- List items will be added here dynamically -->
+                      </ul>
+                    </div>
+                
+                    <div class="popup-overlay" id="popupOverlay" style="display: none;">
+                      <div class="popup-content">
+                        <h3 id="popupTitle">Ajouter un produit</h3>
+                        <label>
+                            Désignation:
+                            <input type="text" id="designationInput" required />
+                            <span id="designationError" class="error-message"></span>
+                          </label>
+                          <label>
+                            Variété:
+                            <input type="text" id="varieteInput" required />
+                            <span id="varieteError" class="error-message"></span>
+                          </label>
+                          <label>
+                            Quantité:
+                            <input type="number" id="quantiteInput" required />
+                            <span id="quantiteError" class="error-message"></span>
+                          </label>
+                          <label>
+                            Unité:
+                            <select id="uniteInput" required>
+                              <option value="">Sélectionnez une unité</option>
+                              <option value="gr">Gr</option>
+                              <option value="kg">Kg</option>
+                              <option value="boite(s)">Boite(s)</option>
+                              <option value="pièces">Pièces</option>
+                            </select>
+                            <span id="uniteError" class="error-message"></span>
+                          </label>
+                          
+                        
+                        <div class="popup-buttons">
+                          <button id="submitBtn">Ajouter</button>
+                          <button id="cancelBtn">Annuler</button>
+                          <button id="deleteBtn" style="display: none;">Supprimer</button>
+                        </div>
+                      </div>
+                    </div>
+                
+                    <div class="popup-overlay" id="confirmDeleteOverlay" style="display: none;">
+                      <div class="popup-content">
+                        <h3>Confirmer la suppression</h3>
+                        <p>Êtes-vous sûr de vouloir supprimer ce produit ?</p>
+                        <div class="popup-buttons">
+                          <button id="confirmDeleteBtn">Confirmer</button>
+                          <button id="cancelDeleteBtn">Annuler</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                
+            </main>
+        </div>
+        
     </div>
     
 
     <script src="index.js"></script>
+    <script src="indexstock.js"></script>
     <script>
         // Fonction pour marquer le menu sélectionné dans les deux menus (principal et popup)
         function highlightSelectedMenu() {
