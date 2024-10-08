@@ -149,3 +149,20 @@ body {
         display: none; /* Masquer le menu latéral sur petits écrans */
     }
 }
+
+
+/* ::::::::::::::::: */
+.menu-aside ul li a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: black; /* Couleur par défaut du texte */
+}
+
+
+/* Classe pour les éléments sélectionnés du menu principal et du popup */
+.menu-aside ul li a.selected,
+.popup-menu ul li a.selected {
+    background-color: red; /* Couleur de fond sélectionnée */
+    color: white; /* Couleur du texte sélectionné */
+}
