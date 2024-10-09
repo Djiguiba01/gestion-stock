@@ -122,9 +122,14 @@
 }
 
 .popup-content h3 {
+    text-align: center;
     margin-bottom: 20px;
     font-size: 22px; /* Taille de la police pour le titre */
     color: #343a40; /* Couleur du titre sombre */
+}
+.popup-content p {
+    text-align: center;
+    
 }
 
 .popup-content label {
@@ -178,6 +183,14 @@
 .popup-buttons button:last-child:hover {
     background-color: #c82333; /* Couleur au survol */
     transform: scale(1.05); /* Effet d'agrandissement au survol */
+}
+
+#confirmDeleteBtn{
+    background-color: red;
+}
+#cancelDeleteBtn, #cancelBtn{
+    background-color: darkslateblue;
+    color: black;
 }
 
 
