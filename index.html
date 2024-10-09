@@ -36,24 +36,28 @@
                     <div class="stock-card">
                       <h2>Stock disponible</h2>
                       <button class="add-product-button" id="addProductBtn">Ajouter un produit</button>
-                    </div>
-
-                    <div class="search-bar">
-                      <input type="text" id="searchInput" placeholder="Rechercher par Désignation ou Variété" />
                   </div>
                   
-                
-                    <div class="product-list">
+                  <!-- Ajout de la barre de recherche -->
+                  <div class="search-container">
+                      <input type="text" id="searchInput" placeholder="Rechercher par Désignation ou Variété">
+                      <i class="fas fa-search"></i> <!-- Font Awesome icon -->
+
+                  </div>
+                  
+                  <div class="product-list">
                       <div class="product-header">
-                        <div>Désignation</div>
-                        <div>Variété</div>
-                        <div>Quantité</div>
-                        <div>Unité</div>
+                          <div>Désignation</div>
+                          <div>Variété</div>
+                          <div>Quantité</div>
+                          <div>Unité</div>
                       </div>
                       <ul id="productList">
-                        <!-- List items will be added here dynamically -->
+                          <!-- Les éléments de la liste seront ajoutés ici dynamiquement -->
                       </ul>
-                    </div>
+                      <p id="noResultsMessage" style="display: none;">Aucun produit trouvé.</p>
+                  </div>
+                  
                 
                     <div class="popup-overlay" id="popupOverlay" style="display: none;">
                       <div class="popup-content">

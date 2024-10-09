@@ -50,7 +50,10 @@ body {
 
 @media (max-width: 700px) {
     .menu-icon {
-        font-size: 20px; /* Réduire la taille de l'icône pour petits écrans */
+        font-size: 30px; /* Réduire la taille de l'icône pour petits écrans */
+    }
+    h1{
+        
     }
 }
 

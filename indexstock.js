@@ -20,36 +20,36 @@ class Product {
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const productListEl = document.getElementById('productList');
-
+    
 
     const searchInput = document.getElementById('searchInput');
-    const productList = JSON.parse(localStorage.getItem('productList')) || [];
+    const noResultsMessage = document.getElementById('noResultsMessage');
 
-    // Affiche la liste initiale des produits
-    renderProductList();
-
-    // Événement de recherche
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const filteredProducts = productList.filter(product => {
-            return (
-                product.designation.toLowerCase().includes(searchTerm) ||
-                product.variete.toLowerCase().includes(searchTerm)
-            );
-        });
-
-        // Si la liste filtrée est vide, afficher un message
-        if (filteredProducts.length === 0) {
-            productListEl.innerHTML = '<p>Aucun produit trouvé.</p>';
-        } else {
-            // Sinon, afficher les produits correspondants
-            renderFilteredProducts(filteredProducts);
-        }
+    // Écouter les entrées dans la barre de recherche
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        filterProducts(searchTerm);
     });
 
-    function renderProductList() {
-        productListEl.innerHTML = productList.length
-            ? productList.map(
+    function filterProducts(searchTerm) {
+        const filteredProducts = productList.filter(product => 
+            product.designation.toLowerCase().includes(searchTerm) || 
+            product.variete.toLowerCase().includes(searchTerm)
+        );
+
+        // Si aucun produit ne correspond, afficher un message
+        if (filteredProducts.length === 0) {
+            productListEl.innerHTML = '';
+            noResultsMessage.style.display = 'block';
+        } else {
+            noResultsMessage.style.display = 'none';
+            renderProductList(filteredProducts);
+        }
+    }
+
+    function renderProductList(products = productList) {
+        productListEl.innerHTML = products.length
+            ? products.map(
                 (product, index) => `
                     <li onclick="editProduct(${index})">
                         <span>${product.designation}</span>
@@ -57,21 +57,13 @@ class Product {
                         <span>${product.quantite}</span>
                         <span>${product.unite}</span>
                     </li>`
-                ).join('')
+              ).join('')
             : '<p>Aucun produit ajouté.</p>';
     }
 
-    function renderFilteredProducts(products) {
-        productListEl.innerHTML = products.map(
-            (product, index) => `
-                <li onclick="editProduct(${index})">
-                    <span>${product.designation}</span>
-                    <span>${product.variete}</span>
-                    <span>${product.quantite}</span>
-                    <span>${product.unite}</span>
-                </li>`
-        ).join('');
-    }
+    // Initialisation
+    renderProductList();
+
   
     // Load saved products from localStorage
     const savedProducts = localStorage.getItem('productList');
