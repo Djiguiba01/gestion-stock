@@ -43,12 +43,20 @@ body {
 }
 
 @media (min-width: 700px) {
-    .menu-icon {
+    .menu-header, .menu-icon {
         display: none; /* Masquer l'icône sur écrans larges */
     }
 }
 
 @media (max-width: 700px) {
+
+    /* .menu-header {
+background-color: green;    
+} */
+    /* .menu-container{
+        padding: 5px;
+    } */
+    
     .menu-icon {
         font-size: 30px; /* Réduire la taille de l'icône pour petits écrans */
     }
@@ -155,6 +163,7 @@ body {
 
 
 /* ::::::::::::::::: */
+
 .menu-aside ul li a {
     display: block;
     /* padding: 10px; */
