@@ -81,6 +81,10 @@
 
 
 /* Styles pour le popup */
+#popupTitle{
+    text-align: center;
+    color: darkslateblue;
+}
 .popup-overlay {
     position: fixed;
     top: 0;
@@ -157,12 +161,12 @@
 }
 
 .popup-buttons button:first-child {
-    background-color: #28a745; /* Couleur du bouton Ajouter */
+    background-color: darkslateblue; /* Couleur du bouton Ajouter */
     color: white;
 }
 
 .popup-buttons button:first-child:hover {
-    background-color: #218838; /* Couleur au survol */
+    background-color: darkslateblue; /* Couleur au survol */
     transform: scale(1.05); /* Effet d'agrandissement au survol */
 }
 

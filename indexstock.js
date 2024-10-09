@@ -190,11 +190,11 @@ class Product {
   popupOverlay.style.display = 'flex';
 
   if (estEdition) {
-    document.getElementById('popupTitle').textContent = 'Modifier un produit';
+    document.getElementById('popupTitle').textContent = 'MODIFIER UN PRODUIT';
     deleteBtn.style.display = 'inline';  // Afficher le bouton supprimer lors de la modification
     cancelBtn.style.display = 'none';    // Cacher le bouton annuler lors de la modification
   } else {
-    document.getElementById('popupTitle').textContent = 'Ajouter un produit';
+    document.getElementById('popupTitle').textContent = 'AJOUTER UN PRODUIT';
     deleteBtn.style.display = 'none';    // Cacher le bouton supprimer lors de l'ajout
     cancelBtn.style.display = 'inline';  // Afficher le bouton annuler lors de l'ajout
   }
