@@ -48,6 +48,10 @@
         font-size: 20px; /* Réduire la taille de la police sur tablette */
     }
 
+    .product-list{
+        padding: 15px;
+    }
+
     .add-product-button {
         padding: 8px 15px;
         font-size: 14px; /* Réduire la taille de la police du bouton sur tablette */
