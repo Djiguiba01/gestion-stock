@@ -20,6 +20,58 @@ class Product {
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const productListEl = document.getElementById('productList');
+
+
+    const searchInput = document.getElementById('searchInput');
+    const productList = JSON.parse(localStorage.getItem('productList')) || [];
+
+    // Affiche la liste initiale des produits
+    renderProductList();
+
+    // Événement de recherche
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const filteredProducts = productList.filter(product => {
+            return (
+                product.designation.toLowerCase().includes(searchTerm) ||
+                product.variete.toLowerCase().includes(searchTerm)
+            );
+        });
+
+        // Si la liste filtrée est vide, afficher un message
+        if (filteredProducts.length === 0) {
+            productListEl.innerHTML = '<p>Aucun produit trouvé.</p>';
+        } else {
+            // Sinon, afficher les produits correspondants
+            renderFilteredProducts(filteredProducts);
+        }
+    });
+
+    function renderProductList() {
+        productListEl.innerHTML = productList.length
+            ? productList.map(
+                (product, index) => `
+                    <li onclick="editProduct(${index})">
+                        <span>${product.designation}</span>
+                        <span>${product.variete}</span>
+                        <span>${product.quantite}</span>
+                        <span>${product.unite}</span>
+                    </li>`
+                ).join('')
+            : '<p>Aucun produit ajouté.</p>';
+    }
+
+    function renderFilteredProducts(products) {
+        productListEl.innerHTML = products.map(
+            (product, index) => `
+                <li onclick="editProduct(${index})">
+                    <span>${product.designation}</span>
+                    <span>${product.variete}</span>
+                    <span>${product.quantite}</span>
+                    <span>${product.unite}</span>
+                </li>`
+        ).join('');
+    }
   
     // Load saved products from localStorage
     const savedProducts = localStorage.getItem('productList');
