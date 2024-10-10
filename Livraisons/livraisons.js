@@ -1,147 +1,135 @@
-let tempDeliveryList = []; // Liste temporaire pour stocker les livraisons
-let deliveries = []; // Liste principale des livraisons
+document.addEventListener('DOMContentLoaded', function() {
+    const addButton = document.getElementById('addButton');
+    const popupForm = document.getElementById('popupForm');
+    const livraisonForm = document.getElementById('livraisonForm');
+    const cancelButton = document.getElementById('cancelButton');
+    const livraisonList = document.getElementById('livraisons-list');
+    const dateField = document.getElementById('date');
+    const suivantButton = document.getElementById('suivantButton');
+  
+    // Afficher la date du jour automatiquement
+    const currentDate = new Date().toLocaleDateString('fr-CA');
+    dateField.value = currentDate;
 
-const deliveryList = document.getElementById('livraisonList');
-const addDeliveryButton = document.getElementById('addDeliveryButton');
-const deliveryPopup = document.getElementById('deliveryPopup');
-const overlay = document.getElementById('overlay');
-const saveDeliveryButton = document.getElementById('saveDeliveryButton');
-const nextDeliveryButton = document.getElementById('nextDeliveryButton');
-const cancelButton = document.getElementById('cancelButton');
-const dateInput = document.getElementById('date');
+    // Charger les livraisons depuis le localStorage
+    let livraisons = JSON.parse(localStorage.getItem('livraisons')) || [];
+    displayLivraisons();
 
-// Popup de détails
-const detailsPopup = document.getElementById('detailsPopup');
-const detailsContent = document.getElementById('detailsContent');
-const closeDetailsPopup = document.getElementById('closeDetailsPopup');
-const addLineButton = document.getElementById('addLineButton');
-
-// Set current date automatically
-const today = new Date().toISOString().split('T')[0];
-dateInput.value = today;
-
-// Récupérer les livraisons existantes du localStorage au chargement de la page
-document.addEventListener('DOMContentLoaded', () => {
-    const storedDeliveries = JSON.parse(localStorage.getItem('deliveries'));
-    if (storedDeliveries) {
-        deliveries = storedDeliveries;
-        deliveries.forEach(delivery => {
-            addDeliveryToList(delivery);
-        });
-    }
-});
-
-addDeliveryButton.addEventListener('click', () => {
-    deliveryPopup.style.display = 'block';
-    overlay.style.display = 'block';
-});
-
-cancelButton.addEventListener('click', () => {
-    deliveryPopup.style.display = 'none';
-    overlay.style.display = 'none';
-});
-
-// Fonction pour stocker temporairement les données et vider les champs sauf la destination
-nextDeliveryButton.addEventListener('click', () => {
-    const destination = document.getElementById('destination').value;
-    const designation = document.getElementById('designation').value;
-    const variete = document.getElementById('variete').value;
-    const quantite = document.getElementById('quantite').value;
-    const unite = document.getElementById('unite').value;
-    const date = document.getElementById('date').value;
-
-    // Stocker les informations sauf destination dans un tableau temporaire
-    const newDelivery = {
-        destination,
-        designation,
-        variete,
-        quantite,
-        unite,
-        date
+    // Objet temporaire pour la livraison en cours
+    let currentLivraison = {
+        destination: '',
+        date: currentDate,
+        articles: [] // Liste des articles ajoutés
     };
 
-    tempDeliveryList.push(newDelivery); // Ajout à la liste temporaire
-
-    // Vider les champs sauf destination
-    document.getElementById('designation').value = '';
-    document.getElementById('variete').value = '';
-    document.getElementById('quantite').value = '';
-    document.getElementById('unite').value = 'gr';
-    dateInput.value = today; // Réinitialiser la date
-});
-
-// Fonction pour ajouter la livraison à la liste et au localStorage
-function addDeliveryToList(delivery) {
-    const listItem = document.createElement('li');
-    listItem.textContent = `Destination: ${delivery.destination}, Date: ${delivery.date}`;
-    listItem.addEventListener('click', () => showDetails(delivery)); // Ajouter un événement de clic
-
-    deliveryList.appendChild(listItem);
-}
-
-// Enregistrer toutes les livraisons temporaires dans la liste principale
-saveDeliveryButton.addEventListener('click', () => {
-    const destination = document.getElementById('destination').value;
-
-    // Ajouter la livraison actuelle à la liste temporaire
-    const finalDelivery = {
-        destination,
-        deliveries: [...tempDeliveryList] // Toutes les livraisons stockées
-    };
-
-    // Ajouter toutes les livraisons à la liste principale
-    finalDelivery.deliveries.forEach(delivery => {
-        addDeliveryToList(delivery);
+    // Ouvrir le popup quand on clique sur le bouton "Ajouter"
+    addButton.addEventListener('click', function() {
+        popupForm.style.display = 'block';
     });
 
-    // Stocker toutes les livraisons dans le localStorage
-    deliveries.push(finalDelivery);
-    localStorage.setItem('deliveries', JSON.stringify(deliveries));
+    // Fermer le popup quand on clique sur "Annuler"
+    cancelButton.addEventListener('click', function() {
+        popupForm.style.display = 'none';
+    });
 
-    // Réinitialiser la liste temporaire et fermer le popup
-    tempDeliveryList = [];
-    deliveryPopup.style.display = 'none';
-    overlay.style.display = 'none';
+    // Bouton "Suivant" pour ajouter un article à la livraison
+    suivantButton.addEventListener('click', function() {
+        addCurrentArticleToList(); // Ajouter l'article actuel
+    });
 
-    // Vider les champs
-    document.getElementById('destination').value = '';
-    document.getElementById('designation').value = '';
-    document.getElementById('variete').value = '';
-    document.getElementById('quantite').value = '';
-    document.getElementById('unite').value = 'gr';
-    dateInput.value = today; // Réinitialiser la date
-});
+    // Enregistrer la livraison complète quand on soumet le formulaire
+    livraisonForm.addEventListener('submit', function(event) {
+        event.preventDefault();
 
-// Afficher le popup avec les détails de la livraison
-function showDetails(delivery) {
-    detailsContent.innerHTML = `
-        <p><strong>Destination:</strong> ${delivery.destination}</p>
-        <p><strong>Désignation:</strong> ${delivery.designation}</p>
-        <p><strong>Variété:</strong> ${delivery.variete}</p>
-        <p><strong>Quantité:</strong> ${delivery.quantite} ${delivery.unite}</p>
-        <p><strong>Date:</strong> ${delivery.date}</p>
-    `;
-    detailsPopup.style.display = 'block'; // Afficher le popup
+        // Ajouter l'article en cours avant l'enregistrement
+        addCurrentArticleToList();
+
+        // Ajouter la livraison à la liste principale
+        currentLivraison.destination = document.getElementById('destination').value;
+        livraisons.push(currentLivraison);
+        localStorage.setItem('livraisons', JSON.stringify(livraisons));
+
+        // Réinitialiser le formulaire et l'état de la livraison
+        popupForm.style.display = 'none';
+        livraisonForm.reset();
+        dateField.value = currentDate;
+        currentLivraison = { destination: '', date: currentDate, articles: [] };
+
+        // Afficher les livraisons mises à jour
+        displayLivraisons();
+    });
+
+    // Fonction pour afficher les livraisons
+    function displayLivraisons() {
+        livraisonList.innerHTML = '';
+
+        livraisons.forEach((livraison, index) => {
+            const li = document.createElement('li');
+            li.textContent = `${livraison.destination} - ${livraison.date}`;
+            livraisonList.appendChild(li);
+
+            // Ajouter un événement de clic pour chaque livraison
+            li.addEventListener('click', function() {
+                showLivraisonDetails(livraison);
+            });
+        });
+    }
+
+    // Fonction pour ajouter l'article actuel à la liste
+    function addCurrentArticleToList() {
+        const designation = document.getElementById('designation').value;
+        const variete = document.getElementById('variete').value;
+        const quantite = document.getElementById('quantite').value;
+        const unite = document.getElementById('unite').value;
+
+        if (designation && quantite && unite) { // Vérifier si les champs requis sont remplis
+            const article = {
+                designation: designation,
+                variete: variete,
+                quantite: quantite,
+                unite: unite
+            };
+
+            // Ajouter l'article à la livraison en cours
+            currentLivraison.articles.push(article);
+
+            // Réinitialiser les champs d'articles
+            document.getElementById('designation').value = '';
+            document.getElementById('variete').value = '';
+            document.getElementById('quantite').value = '';
+            document.getElementById('unite').value = '';
+        }
+    }
+// :::::::::::::::::::::::::::::::::::::::::::::::::
+// Variables pour le popup de détails
+const detailPopup = document.getElementById('detailPopup');
+const popupMessage = document.getElementById('popupMessage');
+const addLineButton = document.getElementById('addLineButton');
+const viewDetailButton = document.getElementById('viewDetailButton');
+const closeDetailPopup = document.getElementById('closeDetailPopup');
+
+// Afficher les détails de la livraison dans le popup
+function showLivraisonDetails(livraison) {
+    popupMessage.textContent = `Détails pour la livraison: ${livraison.destination} - ${livraison.date}`;
+    detailPopup.style.display = 'block';
+
+    // Gérer le clic sur "Ajouter une ligne"
+    addLineButton.onclick = function() {
+        // Logique pour ajouter une ligne (vous pouvez appeler une fonction ici)
+        alert('Ajouter une ligne'); // Remplacez cela par votre logique
+    };
+
+    // Gérer le clic sur "Voir les détails"
+    viewDetailButton.onclick = function() {
+        // Rediriger vers une autre page
+        window.location.href = `detailslivraisons.html?id=${livraison.destination}`; // Changez l'URL comme nécessaire
+    };
 }
 
 // Fermer le popup de détails
-closeDetailsPopup.addEventListener('click', () => {
-    detailsPopup.style.display = 'none';
+closeDetailPopup.addEventListener('click', function() {
+    detailPopup.style.display = 'none';
 });
 
-// Ajouter une ligne à la livraison
-addLineButton.addEventListener('click', () => {
-    const newDestination = prompt('Entrez une nouvelle destination:');
-    if (newDestination) {
-        const newDelivery = {
-            destination: newDestination,
-            designation: '',
-            variete: '',
-            quantite: '',
-            unite: 'gr',
-            date: today
-        };
-        tempDeliveryList.push(newDelivery); // Ajouter la nouvelle ligne à la liste temporaire
-        addDeliveryToList(newDelivery); // Afficher la nouvelle ligne dans la liste
-    }
+   
 });

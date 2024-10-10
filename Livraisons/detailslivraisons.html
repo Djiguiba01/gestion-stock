@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de la Livraison</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Inclure Font Awesome -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .details {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            overflow-x: auto; /* Pour faire défiler le tableau si nécessaire */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        .float-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: darkslateblue;
+            color: white;
+            border: none;
+            border-radius: 5%;
+            padding: 10px 15px;
+            cursor: pointer;
+            /* font-size: 18px; */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <h1>Détails de la Livraison</h1>
+    <div id="detailsContainer" class="details"></div>
+    <button class="float-button" id="downloadBtn"><i class="fas fa-download">Telecharger</i></button> <!-- Bouton flottant avec icône -->
+
+    <script>
+        // Récupérer l'ID de la livraison à partir de l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const destinationId = urlParams.get('id');
+
+        // Liste des livraisons (à remplacer par vos données réelles)
+        const livraisons = JSON.parse(localStorage.getItem('livraisons')) || []; // Exemple : récupère les livraisons du localStorage
+        const detailsContainer = document.getElementById('detailsContainer');
+
+        // Afficher les détails de la livraison
+        function displayDetails() {
+            const livraison = livraisons.find(l => l.destination === destinationId);
+
+            if (livraison) {
+                let detailsHTML = `<h2>Destination: ${livraison.destination}</h2>`;
+                detailsHTML += `<p>Date: ${livraison.date}</p>`;
+                detailsHTML += `<table>`;
+                detailsHTML += `<tr>
+                                    <th>Désignation</th>
+                                    <th>Variété</th>
+                                    <th>Quantité</th>
+                                    <th>Unité</th>
+                                </tr>`;
+
+                livraison.articles.forEach(article => {
+                    detailsHTML += `<tr>
+                                        <td>${article.designation}</td>
+                                        <td>${article.variete}</td>
+                                        <td>${article.quantite}</td>
+                                        <td>${article.unite}</td>
+                                    </tr>`;
+                });
+
+                detailsHTML += `</table>`;
+                detailsContainer.innerHTML = detailsHTML;
+            } else {
+                detailsContainer.innerHTML = `<p>Aucun détail trouvé pour cette livraison.</p>`;
+            }
+        }
+
+        // Fonction pour télécharger le contenu sous forme de PDF
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Titre
+            doc.text("Détails de la Livraison", 10, 10);
+            const livraison = livraisons.find(l => l.destination === destinationId);
+            
+            // Vérifier si la livraison existe
+            if (livraison) {
+                doc.text(`Destination: ${livraison.destination}`, 10, 20);
+                doc.text(`Date: ${livraison.date}`, 10, 30);
+                // doc.text("Articles:", 10, 40);
+                
+                // En-tête du tableau
+                const headers = ["Désignation", "Variété", "Quantité", "Unité"];
+                const rows = livraison.articles.map(article => [article.designation, article.variete, article.quantite, article.unite]);
+                
+                // Ajouter le tableau
+                doc.autoTable({
+                    head: [headers],
+                    body: rows,
+                    startY: 40,
+                });
+            } else {
+                doc.text("Aucun détail trouvé pour cette livraison.", 10, 20);
+            }
+
+            // Définir le nom du fichier PDF
+            const pdfFileName = `livraison_${livraison.destination}.pdf`;
+
+            // Sauvegarder le PDF avec le nom dynamique
+            doc.save(pdfFileName);
+        }
+
+        // Écouteur d'événements pour le bouton de téléchargement
+        document.getElementById('downloadBtn').addEventListener('click', downloadPDF);
+
+        // Appeler la fonction pour afficher les détails
+        displayDetails();
+    </script>
+</body>
+</html>
