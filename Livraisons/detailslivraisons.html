@@ -32,7 +32,6 @@
         th {
             background-color: #f2f2f2;
         }
-        
         .float-button {
             position: fixed;
             bottom: 30px;
@@ -43,10 +42,41 @@
             border-radius: 5%;
             padding: 10px 15px;
             cursor: pointer;
-            /* font-size: 18px; */
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-        
+        /* Style pour le pop-up */
+        .modal {
+            display: none; /* Caché par défaut */
+            position: fixed; /* Reste en place */
+            z-index: 1; /* Au-dessus du contenu */
+            left: 0;
+            top: 0;
+            width: 100%; /* Plein écran */
+            height: 100%; /* Plein écran */
+            overflow: auto; /* Défilement si nécessaire */
+            background-color: rgb(0,0,0); /* Fond noir */
+            background-color: rgba(0,0,0,0.4); /* Fond noir avec opacité */
+            padding-top: 60px; /* Espace en haut */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 15% de haut, centré */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Largeur */
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
@@ -54,21 +84,39 @@
 <body>
     <h1>Détails de la Livraison</h1>
     <div id="detailsContainer" class="details"></div>
-    <button class="float-button" id="downloadBtn"><i class="fas fa-download">Telecharger</i></button> <!-- Bouton flottant avec icône -->
+    <button class="float-button" id="downloadBtn"><i class="fas fa-download"></i> Télécharger</button> <!-- Bouton flottant avec icône -->
+
+    <!-- Modale pour afficher les détails de l'article -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Détails de l'article</h2>
+            <label for="designation">Désignation:</label>
+            <input type="text" id="designation" />
+            <label for="variete">Variété:</label>
+            <input type="text" id="variete" />
+            <label for="quantite">Quantité:</label>
+            <input type="number" id="quantite" />
+            <label for="unite">Unité:</label>
+            <input type="text" id="unite" />
+            <label for="destination">Destination:</label>
+            <input type="text" id="destination" />
+            <button id="saveChangesBtn">Sauvegarder les modifications</button>
+            <button id="deleteItemBtn">Supprimer l'article</button>
+        </div>
+    </div>
 
     <script>
-        // Récupérer l'ID de la livraison à partir de l'URL
         const urlParams = new URLSearchParams(window.location.search);
         const destinationId = urlParams.get('id');
-
-        // Liste des livraisons (à remplacer par vos données réelles)
-        const livraisons = JSON.parse(localStorage.getItem('livraisons')) || []; // Exemple : récupère les livraisons du localStorage
+        const livraisons = JSON.parse(localStorage.getItem('livraisons')) || []; // Récupérer les livraisons
         const detailsContainer = document.getElementById('detailsContainer');
+        const modal = document.getElementById("myModal");
+        const closeModal = document.getElementsByClassName("close")[0];
 
         // Afficher les détails de la livraison
         function displayDetails() {
             const livraison = livraisons.find(l => l.destination === destinationId);
-
             if (livraison) {
                 let detailsHTML = `<h2>Destination: ${livraison.destination}</h2>`;
                 detailsHTML += `<p>Date: ${livraison.date}</p>`;
@@ -79,25 +127,91 @@
                                     <th>Quantité</th>
                                     <th>Unité</th>
                                 </tr>`;
-
-                livraison.articles.forEach(article => {
-                    detailsHTML += `<tr>
+                livraison.articles.forEach((article, index) => {
+                    detailsHTML += `<tr data-index="${index}">
                                         <td>${article.designation}</td>
                                         <td>${article.variete}</td>
                                         <td>${article.quantite}</td>
                                         <td>${article.unite}</td>
                                     </tr>`;
                 });
-
                 detailsHTML += `</table>`;
                 detailsContainer.innerHTML = detailsHTML;
+
+                // Ajouter un événement de clic sur chaque ligne du tableau
+                const rows = detailsContainer.getElementsByTagName('tr');
+                for (let i = 1; i < rows.length; i++) { // Commencer à 1 pour ignorer l'en-tête
+                    rows[i].addEventListener('click', function() {
+                        openModal(i - 1); // Passer l'index de l'article
+                    });
+                }
             } else {
                 detailsContainer.innerHTML = `<p>Aucun détail trouvé pour cette livraison.</p>`;
             }
         }
 
-        // Fonction pour télécharger le contenu sous forme de PDF
-        async function downloadPDF() {
+        // Ouvrir la modale et préremplir les champs
+        function openModal(index) {
+            const livraison = livraisons.find(l => l.destination === destinationId);
+            const article = livraison.articles[index];
+
+            document.getElementById('designation').value = article.designation;
+            document.getElementById('variete').value = article.variete;
+            document.getElementById('quantite').value = article.quantite;
+            document.getElementById('unite').value = article.unite;
+            document.getElementById('destination').value = livraison.destination;
+
+            modal.style.display = "block";
+
+            // Écouteur pour sauvegarder les modifications
+            document.getElementById('saveChangesBtn').onclick = function() {
+                saveChanges(index);
+            };
+
+            // Écouteur pour supprimer l'article
+            document.getElementById('deleteItemBtn').onclick = function() {
+                deleteItem(index);
+            };
+        }
+
+        // Fonction pour sauvegarder les modifications
+        function saveChanges(index) {
+            const livraison = livraisons.find(l => l.destination === destinationId);
+            const article = livraison.articles[index];
+
+            article.designation = document.getElementById('designation').value;
+            article.variete = document.getElementById('variete').value;
+            article.quantite = document.getElementById('quantite').value;
+            article.unite = document.getElementById('unite').value;
+
+            localStorage.setItem('livraisons', JSON.stringify(livraisons)); // Sauvegarder dans le localStorage
+            modal.style.display = "none"; // Fermer la modale
+            displayDetails(); // Rafraîchir les détails affichés
+        }
+
+        // Fonction pour supprimer l'article
+        function deleteItem(index) {
+            const livraison = livraisons.find(l => l.destination === destinationId);
+            livraison.articles.splice(index, 1); // Supprimer l'article
+            localStorage.setItem('livraisons', JSON.stringify(livraisons)); // Sauvegarder dans le localStorage
+            modal.style.display = "none"; // Fermer la modale
+            displayDetails(); // Rafraîchir les détails affichés
+        }
+
+        // Événement pour fermer la modale
+        closeModal.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Événement pour cliquer en dehors de la modale
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+
+     // Fonction pour télécharger le contenu sous forme de PDF
+     async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
@@ -134,6 +248,7 @@
 
         // Écouteur d'événements pour le bouton de téléchargement
         document.getElementById('downloadBtn').addEventListener('click', downloadPDF);
+
 
         // Appeler la fonction pour afficher les détails
         displayDetails();
